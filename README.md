@@ -1,6 +1,6 @@
-# AI Research Paper Analysis
+# AI Research Paper Analysis-Langchain
 
-[![Demo Video](https://drive.google.com/thumbnail?id=1nS46CFyGL7uqQarQUCsVhOmJI4sKCdRh&sz=w1200-h630)](https://drive.google.com/file/d/1nS46CFyGL7uqQarQUCsVhOmJI4sKCdRh/view?usp=sharing)
+[![Demo Video](static/Banner.jpg)](https://drive.google.com/file/d/1nS46CFyGL7uqQarQUCsVhOmJI4sKCdRh/view?usp=sharing)
 *(Click the banner above to watch the demo video)*
 
 ## Overview
