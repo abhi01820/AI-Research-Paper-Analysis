@@ -45,3 +45,19 @@ Always return list of dictionaries only, no preamble.
 
     return sections
 
+
+def split_sections_with_content(text: str, detected_sections: List[Dict]) -> List[Dict]:
+    if not detected_sections:
+        return {"Full_Paper" : text}
+    detected_sections = sorted(detected_sections, key=lambda x: x["start"])
+    results = {}
+    for i, sec in enumerate(detected_sections):
+        start = sec["start"]
+        end = detected_sections[i + 1]["start"] if i + 1 < len(detected_sections) else len(text)
+        section_name = sec["section"]
+        subsection_name = sec.get("subsection", None)
+        section_text = text[start:end].strip()
+        results[section_name] = section_text
+        if subsection_name:
+            results[subsection_name] = results.pop(section_name)
+    return results
