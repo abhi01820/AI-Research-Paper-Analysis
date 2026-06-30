@@ -1,10 +1,7 @@
 from langchain_community.vectorstores import FAISS
-from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
-
+from langchain_core.prompts import PromptTemplate
 
 def get_qa_chain(vectordb, llm):
-    
     retriever = vectordb.as_retriever(score_threshold=0.7)
     prompt_template = """
     You are an assistant. Answer the question **only using the information provided in the context below**.  
@@ -26,14 +23,25 @@ Instructions:
         input_variables=["context", "question"]
     )
     
-    chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=retriever,
-        input_key="query",
-        return_source_documents=True,
-        chain_type_kwargs={"prompt": PROMPT}
+    def format_docs(docs):
+        return "\n\n".join(doc.page_content for doc in docs)
+    
+    from langchain_core.runnables import RunnablePassthrough
+    from langchain_core.output_parsers import StrOutputParser
+
+    lcel_chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | PROMPT
+        | llm
+        | StrOutputParser()
     )
     
-    return chain
+    class WrappedChain:
+        def __init__(self, chain):
+            self.chain = chain
+        def invoke(self, query):
+            result = self.chain.invoke(query)
+            return {"result": result}
+            
+    return WrappedChain(lcel_chain)
     
