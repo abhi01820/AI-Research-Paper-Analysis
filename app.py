@@ -7,6 +7,7 @@ from src.load_and_extract_text import extract_text_from_pdf,extract_pdf_sections
 from src.detect_and_split_sections import refine_sections,split_sections_with_content
 from src.get_summary import generate_detailed_summary
 from src.create_vector_db import create_vector_db
+from src.RAG_retrival_chain import get_qa_chain
 
 from dotenv import load_dotenv
 
@@ -21,6 +22,7 @@ llm_model=os.getenv("LLM_MODEL")
 
 full_text=''
 Research_paper_topics=None
+vector_db=None
 
 llm=ChatGroq(groq_api_key=groq_api_key,model_name=llm_model)
 embedder=HuggingFaceEmbeddings(model_name=embedding_model)
@@ -70,6 +72,29 @@ def get_summary():
     summary = generate_detailed_summary(topic_content, llm)
     
     return jsonify({"summary": summary})
+    
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    global full_text
+    global vector_db
+    
+    user_message = request.json.get('message')
+    print(user_message)
+    
+    if not vector_db:
+        vectordb = create_vector_db(text=full_text, embedder=embedder)
+        vector_db = vectordb
+        
+    chain = get_qa_chain(vectordb=vector_db, llm=llm)
+    
+    ai_response = chain.invoke(user_message)['result']
+    print(ai_response)
+    
+    return jsonify({"response": ai_response})
+        
+    
+    
     
 
 
